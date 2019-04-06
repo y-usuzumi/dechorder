@@ -108,6 +108,18 @@ infixl 7 <:-
 (<:-) :: Pitch -> Interval -> Pitch
 p <:- i = p <:+ negate i
 
+infixl 7 +:>
+(+:>) :: Interval -> Pitch -> Pitch
+(+:>) = flip (<:+)
+
+infixl 7 -:>
+(-:>) :: Interval -> Pitch -> Pitch
+(-:>) = flip (<:-)
+
+absoluteSemitones :: Pitch -> Int
+absoluteSemitones (Pitch (octave, PitchClass (deg, symbols))) =
+  octave * totalSemitones + sum (take (fromEnum deg + 1) semitonesTable) + foldl' (+) 0 (map fromEnum symbols)
+
 showReadable :: Pitch -> String
 showReadable (Pitch (octave, PitchClass (deg, symbols))) = show deg ++ showSymbols symbols ++ show octave
   where

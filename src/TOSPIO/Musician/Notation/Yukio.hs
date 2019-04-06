@@ -10,7 +10,3 @@ data Degree = A | B | C | D | E | F | G | H | J | K | N
 type Octave = Int
 
 newtype Pitch = Pitch (Degree, Octave)
-
--- TODO: Implement this
-normalize :: Pitch -> Pitch
-normalize _ = Pitch (A, 0)
