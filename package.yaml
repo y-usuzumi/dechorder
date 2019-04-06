@@ -21,9 +21,14 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- megaparsec
+- text
 
 default-extensions:
 - MultiParamTypeClasses
+- NamedFieldPuns
+- OverloadedStrings
+- RecordWildCards
 - TypeFamilies
 
 library:
@@ -50,3 +55,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - dechorder
+    - tasty
+    - tasty-hunit

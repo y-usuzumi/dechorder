@@ -1,3 +1,6 @@
 .stack-work/
 dechorder.cabal
 *~
+
+# Emacs
+.dir-locals.el

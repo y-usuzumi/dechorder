@@ -1,10 +1,10 @@
 module TOSPIO.Musician.TuningSystem.EqualTemperament where
 
-import Data.Proxy
-import TOSPIO.Musician.Analog
-import TOSPIO.Musician.Pitch
-import TOSPIO.Musician.Notation.Basic as BasicNotation
-import TOSPIO.Musician.Notation.Yukio as YukioNotation
+import           Data.Proxy
+import           TOSPIO.Musician.Analog
+import           TOSPIO.Musician.Notation.Basic as BasicNotation
+import           TOSPIO.Musician.Notation.Yukio as YukioNotation
+import           TOSPIO.Musician.Tuning
 
 data EqualTemperament
 
