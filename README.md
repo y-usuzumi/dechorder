@@ -1,6 +1,6 @@
 # dechorder
 
-A library that aims to be a complete midi composition toolkit
+A library that aims to be a complete MIDI composition toolkit
 
 ## Features
 
