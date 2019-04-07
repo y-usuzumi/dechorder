@@ -40,36 +40,18 @@ data Interval = Interval { number  :: Int
 totalDegrees :: Int
 totalDegrees = 7
 
-semitonesTable :: [Int]
-semitonesTable = [0, 2, 2, 1, 2, 2, 2]
+degreeSemitones :: Degree -> Int
+degreeSemitones p = case p of
+  C -> 0
+  D -> 2
+  E -> 4
+  F -> 5
+  G -> 7
+  A -> 9
+  B -> 11
 
 totalSemitones :: Int
 totalSemitones = 12
-
-nextDegree :: Degree -> Degree
-nextDegree B = C
-nextDegree d = succ d
-
-prevDegree :: Degree -> Degree
-prevDegree C = B
-prevDegree d = pred d
-
-intervalToSemitones :: Interval -> Int
-intervalToSemitones Interval{..} = let
-  (octaves, degInt) = number `quotRem` totalDegrees
-  in octaves * totalSemitones + quality + degToSemitones degInt
-  where
-    degToSemitones n = case n of
-      0 -> 0   -- unison
-      1 -> 2   -- second
-      2 -> 4   -- third
-      3 -> 5   -- fourth
-      4 -> 7   -- fifth
-      5 -> 9   -- sixth
-      6 -> 11  -- seventh
-      _ | n < 0 -> -degToSemitones (-n)
-      _ -> error "Impossible"
-
 
 negate :: Interval -> Interval
 negate Interval{..} = Interval { number = -number
@@ -82,27 +64,40 @@ mergeSymbols symbols
   | n < 0 = replicate (-n) Flat
   where n = foldl' (+) 0 $ map fromEnum symbols
 
+absoluteDegrees :: Pitch -> Int
+absoluteDegrees (Pitch (octave, PitchClass (deg, _))) =
+  octave * totalDegrees + fromEnum deg
+
+absoluteSemitones :: Pitch -> Int
+absoluteSemitones (Pitch (octave, PitchClass (deg, symbols))) =
+  octave * totalSemitones + degreeSemitones deg + foldl' (+) 0 (map fromEnum symbols)
+
+intervalSemitones :: Interval -> Int
+intervalSemitones Interval{..} = let
+  (oct, deg) = number `quotRem` totalDegrees
+  in oct * 12 + signum deg * degreeSemitones (toEnum $ abs deg) + quality
+
+diffSemitonesToSymbols :: Int -> [Symbol]
+diffSemitonesToSymbols diffSemitones
+  | diffSemitones < 0 = replicate (-diffSemitones) Flat
+  | otherwise = replicate diffSemitones Sharp
+
+showReadable :: Pitch -> String
+showReadable (Pitch (octave, PitchClass (deg, symbols))) = show deg ++ showSymbols symbols ++ show octave
+  where
+    showSymbol Sharp = "#"
+    showSymbol Flat = "b"
+    showSymbol Natural = ""
+    showSymbols symbols = foldl' (++) "" $ map showSymbol symbols
+
 infixl 7 <:+
 (<:+) :: Pitch -> Interval -> Pitch
-Pitch (oct, PitchClass (deg, symbols)) <:+ interval@Interval{..} = let
-  (octOffset, newDeg, semitones) = addDegrees deg number
-
-  diffSemitones = intervalToSemitones interval - semitones
-  in Pitch (oct + octOffset, PitchClass (newDeg, mergeSymbols $ symbols ++ diffSemitonesToSymbols diffSemitones))
-  where
-    addDegrees deg number = let
-      (octaves0, newDegInt0) = (fromEnum deg + number) `quotRem` totalDegrees
-      (octaves, newDegInt) = if newDegInt0 < 0 then (octaves0 - 1, newDegInt0 + totalDegrees) else (octaves0, newDegInt0)
-      semitones = octaves * totalSemitones + findSemitones (fromEnum deg) newDegInt
-      in (octaves, toEnum newDegInt, semitones)
-
-    findSemitones l r
-      | l > r = -findSemitones r l
-      | otherwise = sum $ take (r - l) $ drop (l+1) semitonesTable
-
-    diffSemitonesToSymbols diffSemitones
-      | diffSemitones < 0 = replicate (-diffSemitones) Flat
-      | otherwise = replicate diffSemitones Sharp
+p@(Pitch (oct, PitchClass (deg, symbols))) <:+ interval@Interval{..} = let
+  newAbsDeg = absoluteDegrees p + number
+  (newOct, newDegInt) = newAbsDeg `quotRem` totalDegrees
+  absSemitones = absoluteSemitones $ Pitch (newOct, PitchClass (toEnum newDegInt, []))
+  newAbsSemitones = absoluteSemitones p + intervalSemitones interval
+  in Pitch (newOct, PitchClass (toEnum newDegInt, diffSemitonesToSymbols $ newAbsSemitones - absSemitones))
 
 infixl 7 <:-
 (<:-) :: Pitch -> Interval -> Pitch
@@ -115,15 +110,3 @@ infixl 7 +:>
 infixl 7 -:>
 (-:>) :: Interval -> Pitch -> Pitch
 (-:>) = flip (<:-)
-
-absoluteSemitones :: Pitch -> Int
-absoluteSemitones (Pitch (octave, PitchClass (deg, symbols))) =
-  octave * totalSemitones + sum (take (fromEnum deg + 1) semitonesTable) + foldl' (+) 0 (map fromEnum symbols)
-
-showReadable :: Pitch -> String
-showReadable (Pitch (octave, PitchClass (deg, symbols))) = show deg ++ showSymbols symbols ++ show octave
-  where
-    showSymbol Sharp = "#"
-    showSymbol Flat = "b"
-    showSymbol Natural = ""
-    showSymbols symbols = foldl' (++) "" $ map showSymbol symbols
