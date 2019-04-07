@@ -48,8 +48,9 @@ intervalParser = do
                   'M' -> 0
                   'm' -> -1
                   '+' -> 1
-                  '°' -> -1
+                  '°' -> if number == 0 || number == 3 || number == 4 || number == 7 then -1 else -2
                   '.' -> 0
+
   return Interval { number
                   , quality
                   }

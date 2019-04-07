@@ -23,6 +23,12 @@ intervalParserTests = testGroup "Interval parser"
   [ testCase "Test 1" $ do
       let result = parseMaybe intervalParser "3+"
       result @?= Just (Interval { number = 2, quality = 1 })
+  , testCase "Test 2" $ do
+      let result = parseMaybe intervalParser "3°"
+      result @?= Just (Interval { number = 2, quality = -2 })
+  , testCase "Test 2" $ do
+      let result = parseMaybe intervalParser "4°"
+      result @?= Just (Interval { number = 3, quality = -1 })
   ]
 
 tests :: TestTree
