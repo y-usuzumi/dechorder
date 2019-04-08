@@ -2,7 +2,7 @@ module Tests.BasicNotation.TestPitchIntervalCalculation where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           TOSPIO.Musician.Notation.Basic
+import           TOSPIO.Musician.Notation.IPN
 
 tests :: TestTree
 tests = testGroup "Pitch interval calculation"

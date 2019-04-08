@@ -2,19 +2,16 @@ module TOSPIO.Musician.TuningSystem.EqualTemperament where
 
 import           Data.Proxy
 import           TOSPIO.Musician.Analog
-import qualified TOSPIO.Musician.Notation.Basic as BN
-import qualified TOSPIO.Musician.Notation.Yukio as YN
+import qualified TOSPIO.Musician.Notation.IPN as IPN
 import           TOSPIO.Musician.Tuning
 
-data EqualTemperament
+data IPN12ET = IPN12ET IPN.Pitch Frequency
 
-a440Semitones :: Int
-a440Semitones = BN.absoluteSemitones (BN.Pitch (4, BN.PitchClass (BN.A, [])))
+a440IPN12ET :: IPN12ET
+a440IPN12ET = IPN12ET (IPN.Pitch (4, IPN.PitchClass (IPN.A, []))) 440
 
-instance Tuning EqualTemperament BN.Pitch where
-  toFreq _ p = let
-    semitones = BN.absoluteSemitones p
-    in 440 * 2 ** (fromIntegral (semitones - a440Semitones) / 12)
-
-instance Tuning EqualTemperament YN.Pitch where
-  toFreq _ _ = 440
+instance Tuning IPN12ET IPN.Pitch where
+  toFreq (IPN12ET standard f) p = let
+    standardSemitones = IPN.absoluteSemitones standard
+    semitones = IPN.absoluteSemitones p
+    in f * 2 ** (fromIntegral (semitones - standardSemitones) / 12)

@@ -1,7 +1,7 @@
-module TOSPIO.Musician.Notation.Basic.Parser ( pitchParser
-                                             , intervalParser
-                                             , pp, ip
-                                             ) where
+module TOSPIO.Musician.Notation.IPN.Parser ( pitchParser
+                                           , intervalParser
+                                           , pp, ip
+                                           ) where
 
 import           Data.Maybe
 import           Data.Text
@@ -9,7 +9,7 @@ import           Data.Void
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import           Text.Megaparsec.Char.Lexer
-import           TOSPIO.Musician.Notation.Basic
+import           TOSPIO.Musician.Notation.IPN
 
 data Quality = Diminished | Minor | Perfect | Major | Augmented
 

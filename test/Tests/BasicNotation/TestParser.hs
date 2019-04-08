@@ -5,8 +5,8 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
-import           TOSPIO.Musician.Notation.Basic
-import           TOSPIO.Musician.Notation.Basic.Parser
+import           TOSPIO.Musician.Notation.IPN
+import           TOSPIO.Musician.Notation.IPN.Parser
 
 pitchParserTests :: TestTree
 pitchParserTests = testGroup "Pitch parser"

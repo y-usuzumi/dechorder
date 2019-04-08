@@ -1,4 +1,4 @@
-module TOSPIO.Musician.Notation.Basic where
+module TOSPIO.Musician.Notation.IPN where
 
 import           Data.List
 import           Debug.Trace

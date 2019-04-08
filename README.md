@@ -14,8 +14,8 @@ A library that aims to be a complete MIDI composition toolkit
 * Playing with pitches and intervals
 
 ``` haskell
-import TOSPIO.Musician.Notation.Basic
-import TOSPIO.Musician.Notation.Basic.Parser
+import TOSPIO.Musician.Notation.IPN
+import TOSPIO.Musician.Notation.IPN.Parser
 
 main :: IO ()
 main = do
@@ -31,8 +31,8 @@ main = do
 * Pitch to frequency
 ``` haskell
 import Data.Proxy
-import TOSPIO.Musician.Notation.Basic
-import TOSPIO.Musician.Notation.Basic.Parser
+import TOSPIO.Musician.Notation.IPN
+import TOSPIO.Musician.Notation.IPN.Parser
 import TOSPIO.Musician.Tuning
 
 main :: IO ()
