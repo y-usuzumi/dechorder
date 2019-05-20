@@ -159,9 +159,7 @@ fromAudio a = SoundSample
   , samplingRate = A.sampleRate a
   }
 
-
 test1 = do
-  (Right a) <- importFile "res/sound.wav"
+  (Right a) <- importFile "/home/kj/下载/Yamaha-V50-Rock-Beat-120bpm.wav"
   print a
   play $ fromAudio a
-
