@@ -1,6 +1,3 @@
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE FlexibleContexts #-}
 module Audio.Hibiki where
 
 import Data.IORef
@@ -14,6 +11,8 @@ import qualified Control.Concurrent.BoundedChan as C
 import Control.Arrow
 import Streamly
 import qualified Streamly.Prelude as S
+import Data.FileEmbed
+import TOSPIO.Utils (withFileContentAsTempFile)
 
 import qualified Data.Audio as A
 import qualified Data.Array.IArray as A
@@ -159,7 +158,7 @@ fromAudio a = SoundSample
   , samplingRate = A.sampleRate a
   }
 
-test1 = do
-  (Right a) <- importFile "/home/kj/下载/Yamaha-V50-Rock-Beat-120bpm.wav"
+test1 = withFileContentAsTempFile $(embedFile "Yamaha-V50-Rock-Beat-120bpm.wav") $ \fp -> do
+  (Right a) <- importFile fp
   print a
   play $ fromAudio a

@@ -23,18 +23,26 @@ dependencies:
 - base >= 4.7 && < 5
 - array
 - BoundedChan
+- bytestring
+- exceptions
+- file-embed
 - HCodecs
 - megaparsec
 - sdl2
 - streamly
+- temporary
 - text
 - vector
 
 default-extensions:
+- BlockArguments
 - MultiParamTypeClasses
 - NamedFieldPuns
 - OverloadedStrings
+- RankNTypes
 - RecordWildCards
+- ScopedTypeVariables
+- TemplateHaskell
 - TypeFamilies
 
 library:
