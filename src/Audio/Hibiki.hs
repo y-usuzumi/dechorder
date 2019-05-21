@@ -1,24 +1,25 @@
 module Audio.Hibiki where
 
-import Data.IORef
-import Control.Monad
-import Control.Concurrent
-import Data.Int (Int16)
-import Data.Foldable
-import SDL
-import qualified Data.Vector.Storable.Mutable as V
+import           Control.Arrow
+import           Control.Concurrent
 import qualified Control.Concurrent.BoundedChan as C
-import Control.Arrow
-import Streamly
-import qualified Streamly.Prelude as S
-import Data.FileEmbed
-import TOSPIO.Utils (withFileContentAsTempFile)
+import           Control.Monad
+import           Data.FileEmbed
+import           Data.Foldable
+import           Data.Int                       (Int16)
+import           Data.IORef
+import           Data.String.Interpolate
+import qualified Data.Vector.Storable.Mutable   as V
+import           SDL
+import           Streamly
+import qualified Streamly.Prelude               as S
+import           TOSPIO.Utils                   (withFileContentAsTempFile)
 
-import qualified Data.Audio as A
-import qualified Data.Array.IArray as A
-import qualified Data.Array.Unboxed as A
+import qualified Data.Array.IArray              as A
+import qualified Data.Array.Unboxed             as A
+import qualified Data.Audio                     as A
 
-import Codec.Wav
+import           Codec.Wav
 
 audioCB :: C.BoundedChan Int16 -> AudioFormat sampleType -> V.IOVector sampleType -> IO ()
 audioCB samples format buffer =
@@ -27,51 +28,56 @@ audioCB samples format buffer =
       do
          let n = V.length buffer
          -- print n
-         traverse_ (\ptr -> V.write buffer ptr =<< C.readChan samples) [0..(n -1)]
+         traverse_ (\ptr -> C.readChan samples >>= V.write buffer ptr) [0..n-1]
     _ -> error "Unsupported audio format"
 
 
 play :: SoundSample -> IO ()
-play s = do
+play SoundSample{..} = do
   initializeAll
-  chan <- C.newBoundedChan $ 4096 * 16
+  chan <- C.newBoundedChan $ 40960 * 16
   let
     defaultDevice = OpenDeviceSpec
-      { SDL.openDeviceFreq = Mandate (fromIntegral $ samplingRate s)
+      { SDL.openDeviceFreq = Mandate (fromIntegral $ samplingRate)
       , SDL.openDeviceFormat = Mandate Signed16BitNativeAudio
-      , SDL.openDeviceChannels = Mandate Mono
-      , SDL.openDeviceSamples = 4096 * 2
+      , SDL.openDeviceChannels = Mandate (readChannels $ channels)
+      , SDL.openDeviceSamples = 4096
       , SDL.openDeviceCallback = audioCB chan
       , SDL.openDeviceUsage = ForPlayback
       , SDL.openDeviceName = Nothing
       }
   (device, _) <- openAudioDevice defaultDevice
   setAudioDevicePlaybackState device Play
-  let sound = sampling s
+  let sound = sampling
   runStream $ S.mapM (C.writeChan chan) sound
+  threadDelay 10000000
+  closeAudioDevice device
 
 data Sound = Sound
   { amplitude :: Double -> Double -- from time to (0,1) pcm
-  , duration :: Double -- in seconds
+  , duration  :: Double -- in seconds
   }
 
 data SoundSample = SoundSample
-  { sampling :: Serial Int16
+  { sampling     :: Serial Int16
+  , channels     :: Int
   , samplingRate :: Int
   }
 
-instance Semigroup SoundSample where
-  s1 <> s2 = SoundSample
-    { sampling = sampling s1 <> sampling s2
-    , samplingRate = samplingRate s1
-    }
+-- instance Semigroup SoundSample where
+--   s1 <> s2 = SoundSample
+--     { sampling = sampling s1 <> sampling s2
+--     , samplingRate = samplingRate s1
+--     }
 
+-- FIXME: Incorrect implementation suspected
 fromSound
   :: Int -- sample rate (Hz)
   -> Sound
   -> SoundSample
 fromSound rate sound = SoundSample
   { sampling = S.map (\t'-> rounder $ f (fromIntegral t' / fromIntegral rate)) timeProducer
+  , channels = 1
   , samplingRate = rate
   }
      where
@@ -152,9 +158,17 @@ takeStart t s = Sound (amplitude s) t
 testSound1 = fromSound 48000 $ dropEnd 1 (Sound (\x -> sin (x * x * 440 * 6)) 12) <> takeStart 2 (freqSound cosine 440)
 testSound2 = fromSound 48000 $ takeStart 10 $ Sound (unFourier $ minor 220) 30000 <> Sound (unFourier $ major 220) 4
 
+readChannels :: Int -> Channels
+readChannels 1 = Mono
+readChannels 2 = Stereo
+readChannels 4 = Quad
+readChannels 6 = FivePointOne
+readChannels n = error [i|Unsupported number of channels: #{show n}|]
+
 fromAudio :: A.Audio Int16 -> SoundSample
 fromAudio a = SoundSample
   { sampling = S.fromFoldable $ A.elems $ A.sampleData a
+  , channels = A.channelNumber a
   , samplingRate = A.sampleRate a
   }
 

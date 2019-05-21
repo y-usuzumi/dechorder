@@ -27,6 +27,7 @@ dependencies:
 - exceptions
 - file-embed
 - HCodecs
+- interpolate
 - megaparsec
 - optparse-applicative
 - sdl2
@@ -40,6 +41,7 @@ default-extensions:
 - MultiParamTypeClasses
 - NamedFieldPuns
 - OverloadedStrings
+- QuasiQuotes
 - RankNTypes
 - RecordWildCards
 - ScopedTypeVariables
