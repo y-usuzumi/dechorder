@@ -158,7 +158,8 @@ fromAudio a = SoundSample
   , samplingRate = A.sampleRate a
   }
 
-test1 = withFileContentAsTempFile $(embedFile "Yamaha-V50-Rock-Beat-120bpm.wav") $ \fp -> do
-  (Right a) <- importFile fp
+playFile :: FilePath -> IO ()
+playFile file = do
+  Right a <- importFile file
   print a
   play $ fromAudio a

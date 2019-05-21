@@ -28,6 +28,7 @@ dependencies:
 - file-embed
 - HCodecs
 - megaparsec
+- optparse-applicative
 - sdl2
 - streamly
 - temporary
@@ -71,3 +72,4 @@ tests:
     - dechorder
     - tasty
     - tasty-hunit
+    - tasty-hspec
